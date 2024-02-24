@@ -1,0 +1,50 @@
+.was-wrap{
+    margin: 20px 20px 0 0;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #333;
+    border-radius: 20px;
+    background-color: #ffffff;
+    padding:50px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.was-wrap input{
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    box-sizing: border-box;
+    font-size: 16px;
+    color: #7a7f85;
+}
+.was-wrap .was-header{
+    text-align: center;
+    margin-bottom: 20px;
+}
+.was-wrap .was-header .was-brand{
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 50px;
+    font-weight: bold;
+}
+
+.was-wrap .was-slogan{
+    font-size: 20px;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+}
+
+.was-wrap .button-large{
+    padding: 20px;
+    font-size: 20px;
+    width: 150px;
+    margin: 0 auto;
+    display: block;
+    margin-top: 50px;
+    border-radius: 10px;
+}
