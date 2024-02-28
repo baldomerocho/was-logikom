@@ -3,7 +3,7 @@
 * Plugin Name: WAS Logikom
 * Plugin URI: https://logikom.com
 * Description: Send notifications to WhatsApp. Powered by Logikom
-* Version: 1.0
+* Version: 1.1.0
 * Author: Baldomero Cho
 * Author URI: https://datogedon.com
 **/
@@ -15,17 +15,49 @@ include(__DIR__ . "/admin.php");
 add_action("woocommerce_order_status_pending_to_processing_notification", "waba_neworder_hook");
 add_action("woocommerce_order_status_pending_to_on-hold_notification", "waba_neworder_hook");
 
+// Registrar la función de activación
+register_activation_hook( __FILE__, 'waba_plugin_activation' );
+
+// Función de activación del plugin
+function waba_plugin_activation(): void {
+	// Comprobar si ya existen los valores de opciones
+	$existing_options = get_option( 'waba_plugin_options' );
+
+	// Si no existen, establecer valores iniciales
+	if ( false === $existing_options ) {
+		$initial_options = array(
+			'key' => ' ',
+			'number' => '59899999999',
+			'webhook' => 'https://was.logikom.uy/api/messages/send',
+			'send_image' => true, // Valor booleano inicial
+			'waid' => '1'
+		);
+
+		// Guardar los valores iniciales de opciones
+		update_option( 'waba_plugin_options', $initial_options );
+	}
+}
+
+// Registrar la función de desactivación
+register_deactivation_hook( __FILE__, 'waba_plugin_deactivation' );
+
+// Función de desactivación del plugin
+function waba_plugin_deactivation(): void {
+	// Eliminar los valores de opciones
+	delete_option( 'waba_plugin_options' );
+}
 
 
-function waba_neworder_hook($param){
-    
+
+function waba_neworder_hook($param): void {
+
     $options = get_option( 'waba_plugin_options' );
-    if(!isset($options["key"]) || !isset($options["number"])) return ; 
-    
+    if(!isset($options["key"]) || !isset($options["number"])) return ;
+
     $order = wc_get_order($param);
     $data = $order->get_data();
     $text = '';
-    
+
     $n1 = $param;
     $text .= "*Nuevo pedido recibido*\nNúmero pedido: *$n1*\n\n";
 
@@ -53,25 +85,24 @@ function waba_neworder_hook($param){
     $n1 = $data["billing"]["phone"];
     $text .= "Teléfono: $n1\n\n";
 
-
     $text .= "*Productos*\n";
     $nitems = [];
     // Iterating through each WC_Order_Item_Product objects
     foreach ($order->get_items() as $item_key => $item ):
         $text .= "\n";
-        $item_data    = $item->get_data();
-        //$nitems[] = $item_data;
-
+        $item_data = $item->get_data();
+	    $nitems[] = $item_data;
+		$n1 = $item_data["product_id"];
+		$text .= "Producto ID: $n1\n";
         $n1 = $item_data["name"];
         $text .= "Nombre: $n1\n";
         $n1 = $item_data["quantity"];
         $text .= "Cantidad: $n1\n";
-        $n1 = $item_data["total"];
+        $n1 = floatval($item_data["total"]);
         $text .= "Precio: $n1\n";
-
     endforeach;
 
-    $n1 = $data["total"];
+    $n1 = floatval($data["total"]);
     $text .= "\n*Total*: $n1";
 
 
@@ -81,10 +112,10 @@ function waba_neworder_hook($param){
         "number" => $options["number"],
         "message" => $text,
 	    "waid" => $options["waid"],
-        "webhook" => $options["webhook"]
-    ); 
+        "webhook" => $options["webhook"],
+    );
 
-    
+
     $result = waba_sendMessage($params);
     if(isset($result["error_message"])){
 
@@ -101,22 +132,21 @@ function waba_neworder_hook($param){
         file_put_contents(__DIR__ . "/data/Order-" . $md5. ".json", $t1);
     }
 
+	if($options['send_image'] == "true") {
+		foreach ($nitems as  $product ):
+			$params = array(
+				"key"=> $options["key"],
+				"number" => $options["number"],
+				"message" => "*".$product["name"]. "* | Pedido: *".$param."*",
+				"waid" => $options["waid"],
+				"webhook" => $options["webhook"],
+				"medias" => get_attached_file(get_post_thumbnail_id($product["product_id"]))
+			);
+			waba_sendImage($params);
+		endforeach;
+	}
+
 }
-
-/*
-function waba_neworder_hook1($param){
-    ob_start();
-    var_dump($param);
-    $str = ob_get_clean();
-    file_put_contents(__DIR__ . "/data2/data-3.json", $str);
-
-    ob_start();
-    $order = wc_get_order($param);
-    var_dump($order);
-    $str = ob_get_clean();
-    file_put_contents(__DIR__ . "/data2/data-4.json", $str);
-}*/
-
 
 // attach contact email 
 add_action( 'wpcf7_before_send_mail', 'waba_contact_send' );
@@ -222,6 +252,4 @@ function waba_contact_send( $contact_form ) {
 
         }
     }
-
-    
 }

@@ -21,9 +21,18 @@
     font-size: 16px;
     color: #7a7f85;
 }
+.was-wrap input[type="checkbox"]{
+    width: auto;
+    margin: 0 10px 0 0;
+    border-radius: 4px;
+}
+
 .was-wrap .was-header{
     text-align: center;
     margin-bottom: 20px;
+}
+.was-wrap .was-header img{
+    height: 40px;
 }
 .was-wrap .was-header .was-brand{
     text-align: center;
