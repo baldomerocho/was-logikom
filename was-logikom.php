@@ -3,7 +3,7 @@
 * Plugin Name: WAS Logikom
 * Plugin URI: https://logikom.com
 * Description: Send notifications to WhatsApp. Powered by Logikom
-* Version: 1.1.0
+* Version: 1.1.1
 * Author: Baldomero Cho
 * Author URI: https://datogedon.com
 **/
