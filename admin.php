@@ -36,6 +36,7 @@ function waba_register_settings() {
     register_setting( 'waba_plugin_options', 'waba_plugin_options',
         'waba_plugin_options_validate' );
 
+    add_settings_field( 'waba_plugin_setting_title', 'Titulo del mensaje', 'waba_plugin_setting_title', 'waba_plugin', "waba_api_settings" );
     add_settings_section( 'waba_api_settings', 'API Credentials', 'waba_plugin_section_text', 'waba_plugin' );
     add_settings_field( 'waba_plugin_setting_webhook', 'Webhook', 'waba_plugin_setting_webhook', 'waba_plugin', "waba_api_settings" );
     add_settings_field( 'waba_plugin_setting_waid', 'WhatsApp ID', 'waba_plugin_setting_waid', 'waba_plugin', "waba_api_settings" );
@@ -54,6 +55,10 @@ function waba_plugin_setting_api_key() {
     echo "<input style='width:100%;padding:0.5em;' id='waba_plugin_setting_api_key' name='waba_plugin_options[key]' type='text' value='" . esc_attr( $options['key'] ) . "' />";
 }
 
+function waba_plugin_setting_title() {
+	$options = get_option( 'waba_plugin_options' );
+	echo "<input style='width:100%;padding:0.5em;' id='waba_plugin_setting_title' name='waba_plugin_options[title]' type='text' value='" . esc_attr( $options['title'] ) . "' />";
+}
 function waba_plugin_setting_token() {
 	$options = get_option( 'waba_plugin_options' );
 	echo "<input style='width:100%;padding:0.5em;' id='waba_plugin_setting_token' name='waba_plugin_options[token]' type='text' value='" . esc_attr( $options['token'] ) . "' />";

@@ -44,7 +44,8 @@ function waba_plugin_activation(): void {
 			'webhook' => 'https://was.logikom.uy/api/messages/send',
 			'send_image' => true, // Valor booleano inicial
 			'waid' => '1',
-			'token' => ''
+			'token' => '',
+			'title' => 'Nuevo mensaje de contacto recibido'
 		);
 
 		// Guardar los valores iniciales de opciones
@@ -73,7 +74,7 @@ function waba_neworder_hook($param): void {
     $text = '';
 
     $n1 = $param;
-    $text .= "*Nuevo pedido recibido*\nNúmero pedido: *$n1*\n\n";
+    $text .= "*".$options["title"]."*\nNúmero pedido: *$n1*\n\n";
 
     $n1 = $data["billing"]["first_name"] . " " . $data["billing"]["last_name"];
     $text .= "Nombre: $n1\n";
@@ -164,6 +165,7 @@ function waba_neworder_hook($param): void {
 
 // attach contact email 
 add_action( 'wpcf7_before_send_mail', 'waba_contact_send' );
+add_action( 'wpforms_process_complete', 'waba_contact_send_wpforms', 10, 4 );
 
 
 function endsWith( $haystack, $needle ) {
@@ -217,7 +219,7 @@ function waba_contact_send( $contact_form ) {
     if($submission ) {
         $posted_data = $submission->get_posted_data();
 
-        $text = "*Nuevo mensaje de contacto recibido* \n";
+        $text = "*".$options["title"]."* \n";
         $post_id = $submission->get_meta('container_post_id');
         $form_id= $contact_form->id();
         $text .= "Post id: $post_id\nForm id: $form_id\n\n";
@@ -268,4 +270,52 @@ function waba_contact_send( $contact_form ) {
 
         }
     }
+}
+function waba_contact_send_wpforms( $fields, $entry, $form_data, $entry_id ) {
+	$options = get_option( 'waba_plugin_options' );
+	if(!isset($options["key"]) || !isset($options["number"])) return;
+
+	$text = "*".$options["title"]."* \n";
+	$post_id = isset($form_data['post_id']) ? $form_data['post_id'] : 'N/A';
+	$form_id = $form_data['id'];
+	$text .= "Post id: $post_id\nForm id: $form_id\n\n";
+
+	$conversions = array(
+		"your-name" => "Nombre",
+		"your-email" => "Correo",
+		"your-subject" => "Asunto",
+		"your-message" => "Mensaje"
+	);
+
+	foreach($fields as $field) {
+		$field_id = $field['id'];
+		$field_value = $field['value'];
+		$field_name = isset($conversions[$field_id]) ? $conversions[$field_id] : $field_id;
+		$text .= "$field_name: ```$field_value```\n";
+	}
+
+	$params = array(
+		"key" => $options["key"],
+		"number" => $options["number"],
+		"message" => $text,
+		"waid" => $options["waid"],
+		"webhook" => $options["webhook"]
+	);
+
+	$result = waba_sendMessage($params);
+	if(isset($result["error_message"])) {
+		// Put to error to retry later
+		$t1 = json_encode(array(
+			"error_message" => $result["error_message"],
+			"params" => array(
+				"key" => $options["key"],
+				"message" => $text,
+				"number" => $options["number"],
+				"waid" => $options["waid"],
+				"webhook" => $options["webhook"]
+			)
+		));
+		$md5 = md5(json_encode($text));
+		file_put_contents(__DIR__ . "/data/" . $md5 . ".json", $t1);
+	}
 }
