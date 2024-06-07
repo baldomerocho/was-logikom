@@ -42,6 +42,7 @@ function waba_register_settings() {
     add_settings_field( 'waba_plugin_setting_api_key', 'API Key', 'waba_plugin_setting_api_key', 'waba_plugin', "waba_api_settings" );
     add_settings_field( 'waba_plugin_setting_number', 'Destinatario', 'waba_plugin_setting_number', 'waba_plugin', "waba_api_settings" );
     add_settings_field( 'waba_plugin_setting_send_image', 'Enviar imágen', 'waba_plugin_setting_send_image', 'waba_plugin', "waba_api_settings" );
+    add_settings_field( 'waba_plugin_setting_token', 'GH Token', 'waba_plugin_setting_token', 'waba_plugin', "waba_api_settings" );
 
 }
 
@@ -51,6 +52,11 @@ function waba_plugin_options_validate( $input ) {
 function waba_plugin_setting_api_key() {
     $options = get_option( 'waba_plugin_options' );
     echo "<input style='width:100%;padding:0.5em;' id='waba_plugin_setting_api_key' name='waba_plugin_options[key]' type='text' value='" . esc_attr( $options['key'] ) . "' />";
+}
+
+function waba_plugin_setting_token() {
+	$options = get_option( 'waba_plugin_options' );
+	echo "<input style='width:100%;padding:0.5em;' id='waba_plugin_setting_token' name='waba_plugin_options[token]' type='text' value='" . esc_attr( $options['token'] ) . "' />";
 }
 function waba_plugin_setting_number(): void {
     $options = get_option( 'waba_plugin_options' );

@@ -10,6 +10,19 @@
 include(__DIR__ . "/send.php");
 include(__DIR__ . "/admin.php");
 
+defined('ABSPATH') || die('No script kiddies please!');
+
+if (is_admin()) {
+	define('GH_REQUEST_URI', 'https://api.github.com/repos/%s/%s/releases');
+	define('GHPU_USERNAME', 'baldomerocho');
+	define('GHPU_REPOSITORY', 'was-logikom');
+
+	include_once plugin_dir_path(__FILE__) . '/gh-plugin-updater/GhPluginUpdater.php';
+
+	$updater = new GhPluginUpdater(__FILE__);
+	$updater->init();
+}
+
 
 
 add_action("woocommerce_order_status_pending_to_processing_notification", "waba_neworder_hook");
@@ -30,7 +43,8 @@ function waba_plugin_activation(): void {
 			'number' => '59899999999',
 			'webhook' => 'https://was.logikom.uy/api/messages/send',
 			'send_image' => true, // Valor booleano inicial
-			'waid' => '1'
+			'waid' => '1',
+			'token' => ''
 		);
 
 		// Guardar los valores iniciales de opciones
@@ -241,10 +255,12 @@ function waba_contact_send( $contact_form ) {
             // put to error to retry later
             $t1 = json_encode(array(
                 "error_message" =>$result["error_message"],
-                "message"=> $params["message"],
                 "params"=> array(
                     "key"=> $options["key"],
+                    "message"=> $text,
                     "number" => $options["number"],
+	                "waid" => $options["waid"],
+					"webhook" => $options["webhook"]
                 )
             ));
             $md5 = md5(json_encode($text));
