@@ -10,21 +10,6 @@
 include(__DIR__ . "/send.php");
 include(__DIR__ . "/admin.php");
 
-defined('ABSPATH') || die('No script kiddies please!');
-
-if (is_admin()) {
-	define('GH_REQUEST_URI', 'https://api.github.com/repos/%s/%s/releases');
-	define('GHPU_USERNAME', 'baldomerocho');
-	define('GHPU_REPOSITORY', 'was-logikom');
-
-	include_once plugin_dir_path(__FILE__) . '/gh-plugin-updater/GhPluginUpdater.php';
-
-	$updater = new GhPluginUpdater(__FILE__);
-	$updater->init();
-}
-
-
-
 add_action("woocommerce_order_status_pending_to_processing_notification", "waba_neworder_hook");
 add_action("woocommerce_order_status_pending_to_on-hold_notification", "waba_neworder_hook");
 
@@ -41,7 +26,7 @@ function waba_plugin_activation(): void {
 		$initial_options = array(
 			'key' => ' ',
 			'number' => '59899999999',
-			'webhook' => 'https://was.logikom.uy/api/messages/send',
+			'webhook' => 'https://api.logikom.uy/api/messages/send',
 			'send_image' => true, // Valor booleano inicial
 			'waid' => '1',
 			'token' => '',
@@ -52,17 +37,6 @@ function waba_plugin_activation(): void {
 		update_option( 'waba_plugin_options', $initial_options );
 	}
 }
-
-// Registrar la función de desactivación
-register_deactivation_hook( __FILE__, 'waba_plugin_deactivation' );
-
-// Función de desactivación del plugin
-function waba_plugin_deactivation(): void {
-	// Eliminar los valores de opciones
-	delete_option( 'waba_plugin_options' );
-}
-
-
 
 function waba_neworder_hook($param): void {
 
